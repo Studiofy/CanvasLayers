@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 Studiofy & Antony Dzeryn
+Copyright © 2023 Studiofy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,6 @@ THE SOFTWARE.
 */
 
 /**
- * 
- * The concept of CanvasLayerContainer/CanvasLayer/CanvasLayerElement is based on the concept of original canvaslayers.js.
- * It uses an array to collect objects and their properties and use it also to manage their z-indexes
- * 
- */
-
-/**
  * @description The Layer Class
  * @param _posX stores the X Axis Position of the Layer
  * @param _posY stores the Y Axis Position of the Layer
@@ -48,7 +41,7 @@ export default class CanvasLayer {
     _isLayerVisible; _isLayerMovable;
     _fillColor;
 
-    _layerContents = [];
+    _layerElements = [];
 
     constructor(name = "New Layer", width, height) {
         this.setName(name);
@@ -199,8 +192,12 @@ export default class CanvasLayer {
         this.setLayerVisibility(!this.getLayerVisibility());
     }
 
-    addContent(element) {
-        this._layerContents.push(element);
+    addElement(element) {
+        this._layerElements.push(element);
+    }
+
+    getElements() {
+        return this._layerElements;
     }
 
     /**

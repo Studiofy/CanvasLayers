@@ -8,7 +8,7 @@
 	</head>
 	
 	<body>
-		<div class="container text-center" style="max-width: 1100px">
+		<div class="container-fluid text-center">
 			<div class="row mt-5">
 				<div class="col">
 					<button id="btnNewLayer" type="button" class="btn border-dark"><i class="bi bi-square"></i> New Layer</button>
@@ -20,12 +20,12 @@
 					<button id="btnSwapLayer" type="button" class="btn btn-outline-dark"><i class="bi bi-subtract"></i> Swap Layers</button>
 				</div>
 			</div>
-			<div class="row mt-3">
-				<div class="col">
-					<canvas id="canvas" class="rounded" width="700" height="500" style="border: 1px solid black;"></canvas>
+			<div class="row mt-5 me-0">
+				<div class="col-8 pe-0">
+					<canvas id="canvas" class="rounded" height="500" width="700" style="border: 1px solid black;"></canvas>
 				</div>
-				<div class="col">
-					<div class="row rounded overflow-y-auto" style="max-width: 700px; margin: 0 auto; height: 502px; border: 1px solid black;" id="layerContainerDOM">
+				<div class="col-3">
+					<div class="row rounded overflow-y-auto" style="margin: 0 auto; height: 502px; border: 1px solid black;" id="layerContainerDOM">
 					</div>
 				</div>
 			</div>
@@ -33,6 +33,7 @@
 		<script type="module">
 			import ParentContainer from './js/CanvasLayerContainer.js';
 			import CanvasLayer from './js/CanvasLayer.js';
+			import CanvasLayerElement from './js/CanvasLayerElement.js';
 
 			let container = new ParentContainer("canvas", "2d");
 			
@@ -176,6 +177,10 @@
 				newLayer.setName(`Layer ${layerCount}`);
 				newLayer.drawLayer(container.get2DContext());
 				container.addLayer(newLayer);
+				for (let layers of container.getLayers()) {
+					addMouseEventsToLayer(layers.getName());
+				}
+
 				layerCount++;
 				btnToggleDisplayLayers.click();
 			});
@@ -202,6 +207,21 @@
 					container.swapLayerIndex(fLayer, sLayer);
 				}
 				container.displayLayers(true);
+			});
+
+			btnNewImage.addEventListener('click', function() {
+				let newElement = new CanvasLayerElement();
+				newElement.setName("AS-DPS Dark Logo");
+				newElement.setWidth(100);
+				newElement.setHeight(100);
+				newElement.drawImage(container.getCanvas().getContext('2d'), 'assets\\asdps-light.png', 0, 0, newElement.getWidth(), newElement.getHeight());
+				let newLayer = new CanvasLayer('New Layer w/ Image', newElement.getWidth(), newElement.getHeight());
+				newLayer.setFillColor('dodgerblue');
+				newLayer.addElement(newElement);
+				addMouseEventsToLayer(newLayer._name);
+				container.addLayer(newLayer);
+				console.log(newLayer.getElements());
+				btnToggleDisplayLayers.click();
 			});
 		</script>
 	</body>

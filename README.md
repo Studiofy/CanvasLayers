@@ -1,18 +1,12 @@
-Studiofy/CanvasLayers
+Studiofy/CanLayer
 ============
 
-CanvasLayers is a small javascript library for adding layers to the HTML5
-canvas tag.  It is based on ant512/CanvasLayers' repository.
+CanLayer is a small JavaScript library that can be used without using runtime environments for JavaScript like Node.JS
   
 Requirements
 ------------
-
-* Any modern web browser (anything Webkit or Gecko-based, Opera, etc).
+* Chromium Browsers (Google Chrome, Microsoft Edge, Opera GX, etc.)
 
 The Author
-----------
-* Written by [Antony Dzeryn](https://github.com/ant512) - [Email](ant@simianzombie.com)
-
-Contributor/s
 -----------
-* [Studiofy - Terence Carrera](https://github.com/RENCENDANT)
+* [Studiofy/Terence Carrera](https://github.com/RENCENDANT)

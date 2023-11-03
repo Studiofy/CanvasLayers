@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 Studiofy & Antony Dzeryn
+Copyright © 2023 Studiofy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-
-/**
- * 
- * The concept of CanvasLayerContainer/CanvasLayer/CanvasLayerElement is based on the concept of original canvaslayers.js.
- * It uses an array to collect objects and their properties and use it also to manage their z-indexes
- * 
- */
 
 import CanvasLayer from './CanvasLayer.js';
 
