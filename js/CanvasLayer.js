@@ -21,6 +21,8 @@ THE SOFTWARE.
 
 */
 
+import LayerElement from "./CanvasLayerElement.js";
+
 /**
  * @description The Layer Class
  * @param _posX stores the X Axis Position of the Layer
@@ -77,20 +79,32 @@ export default class CanvasLayer {
         return this._posY;
     }
 
+    /**
+     * Sets the Y Axis Position of the selected layer
+     * @param {number} posY 
+     */
     setPosY(posY) {
         this._posY = posY;
     }
 
+    /**
+     * Gets the fillColor for the selected layer
+     * @returns fillColor
+     */
     getFillColor() {
         return this._fillColor;
     }
 
+    /**
+     * Sets the fillColor for the selected layer
+     * @param {string} fillColor 
+     */
     setFillColor(fillColor) {
         this._fillColor = fillColor;
     }
     
     /**
-     * Get the width of the selected layer
+     * Gets the width of the selected layer
      * @returns {number} width
      */
     getWidth() {
@@ -98,7 +112,7 @@ export default class CanvasLayer {
     }
 
     /**
-     * Set the width of the selected layer
+     * Sets the width of the selected layer
      * @param {number} width 
      */
     setWidth(width) {
@@ -106,13 +120,17 @@ export default class CanvasLayer {
     }
 
     /**
-     * Get the height of the selected layer
+     * Gets the height of the selected layer
      * @returns {number} height
      */
     getHeight() {
         return this._height;
     }
 
+    /**
+     * Sets the height of the selected layer
+     * @param {number} height 
+     */
     setHeight(height) {
         this._height = height;
     }
@@ -192,12 +210,42 @@ export default class CanvasLayer {
         this.setLayerVisibility(!this.getLayerVisibility());
     }
 
+    /**
+     * Insert element to the layer
+     * @param {LayerElement} element 
+     */
     addElement(element) {
-        this._layerElements.push(element);
+        if (element instanceof LayerElement) {
+            this.getElements().push(element);
+        }
     }
 
+    /**
+     * Remove selected element to the layer
+     * @param {LayerElement} element 
+     */
+    removeElement(element) {
+        if (element instanceof LayerElement) {
+            this.getElements().pop(element);
+        }
+    }
+
+    /**
+     * Gets the list of elements that is currently inside the layer
+     * @returns layerElements
+     */
     getElements() {
         return this._layerElements;
+    }
+
+    selectElement(name) {
+        const selectedElement = this.getElements().find(element => element.getName() === name);
+        if (selectedElement != null) {
+            return selectedElement;
+        } else {
+            console.error(`ELement with name "${name}" not found in the collection.`);
+            return null;
+        }
     }
 
     /**
@@ -213,9 +261,13 @@ export default class CanvasLayer {
             context.rect(this.getPosX(), this.getPosY(), this.getWidth(), this.getHeight());
     
             context.fill();
-    
-            context.closePath();
+
+            if(this.getLayerMovability() === true) {
+                
+            }
+
             context.save();
         }
+        context.restore();
     }
 }

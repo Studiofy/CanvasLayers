@@ -24,7 +24,7 @@ THE SOFTWARE.
 import CanvasLayer from './CanvasLayer.js';
 
 /**
- * @description The LayerContainer Class
+ * The LayerContainer Class
  * @property _canvas is used to store the canvas element
  * @property _ctx is used to get the context of the canvas
  * @property _layers is used to store the collection of canvas layer
@@ -48,107 +48,222 @@ export default class ParentContainer
         this.set2DContext(ctx);
     }
 
+    /**
+     * Gets the current context of the canvas
+     * @returns ctx (context)
+     */
     get2DContext() {
         return this._ctx;
     }
 
+    /**
+     * Sets the current context of the canvas
+     * @param {string} ctx 
+     */
     set2DContext(ctx) {
         this._ctx = this.getCanvas().getContext(ctx);
     }
 
+    /**
+     * Gets the canvas' Id
+     * @returns canvas
+     */
     getCanvas() {
         return this._canvas;
     }
 
+    /**
+     * Sets the canvas' Id
+     * @param {string} canvas 
+     */
     setCanvas(canvas) {
         this._canvas = canvas;
     }
 
+    /**
+     * Gets the list of layers
+     * @returns layers
+     */
     getLayers() {
         return this._layers;
     }
 
     /**
-     *  Displays the sorted layers based on their indexes
+     * Displays the sorted layers based on their indexes
      * @param {boolean} sorted true to display layers based on their index or false to display layers based on their arrangement
      */
     displayLayers(sorted)
     {
         let IsDisplaySorted = sorted ? true : false;
-
         if (IsDisplaySorted && layerContainerDOM) {
             if (this._layers.length != 0) {
-                const sortedLayers = this._layers.slice().sort((a, b) => a._index - b._index);
+                const sortedLayers = this.getLayers().slice().sort((a, b) => a._index - b._index);
                 this.get2DContext().clearRect(0, 0, this.getCanvas().width, this.getCanvas().height);
-    
+                layerContainerDOM.innerHTML = "";
                 for (const layer of sortedLayers) {
-                    if (layer._isLayerVisible) {
-                        layer.drawLayer(this._ctx);
+                    if (layer.getLayerVisibility() === true) {
+                        layer.drawLayer(this.get2DContext());
+                        let columnItem = document.createElement("div");
+                        columnItem.classList.add("row", "mt-2", "mb-3");
+                        columnItem.style.maxHeight = '30px';
+                        let buttonItem = document.createElement("button");
+                        buttonItem.classList.add("btn", "btn-outline-primary", "mx-3", "my-1");
+                        buttonItem.style.backgroundColor = `${layer.getFillColor()}`;
+                        buttonItem.style.color = 'black';
+                        buttonItem.textContent = `${layer.getName()}`;
+                        buttonItem.setAttribute('data-default-name', `${layer.getName()}`);
+                        buttonItem.addEventListener('click', function () {
+                            let defaultName = buttonItem.getAttribute('data-default-name');
+                            // Get the current visibility
+                            let currentVisibility = layer.getLayerVisibility(); 
+                            // Toggle the visibility of the layer
+                            layer.setLayerVisibility(!currentVisibility);
+                            buttonItem.textContent = !currentVisibility ? defaultName : `${defaultName} (hidden)`;
+                        });
+                        columnItem.appendChild(buttonItem);
+                        layerContainerDOM.appendChild(columnItem);
                     }
                 }
-    
                 console.log("Canvas ID: " + this._canvas.id + "\nLayers: " + JSON.stringify(sortedLayers, null, 2));
             }
             else {
-                console.log("Canvas ID: " + this._canvas.id + "\nLayers: No Layers");
+                console.error("Canvas ID: " + this._canvas.id + "\nLayers: No Layers");
             }
         }
         else {
             if (this._layers.length != 0) {
                 this.get2DContext().clearRect(0, 0, this.getCanvas().width, this.getCanvas().height);
-
-                for (const layer of this._layers) {
-                    if (layer._isLayerVisible) {
-                        layer.drawLayer(this._ctx);
+                layerContainerDOM.innerHTML = "";
+                for (const layer of this.getLayers()) {
+                    if (layer.getLayerVisibility() === true) {
+                        layer.drawLayer(this.get2DContext());
+                        let columnItem = document.createElement("div");
+                        columnItem.classList.add("row", "mt-2", "mb-3");
+                        columnItem.style.maxHeight = '30px';
+                        let buttonItem = document.createElement("button");
+                        buttonItem.classList.add("btn", "btn-outline-primary", "mx-3", "my-1");
+                        buttonItem.style.backgroundColor = `${layer.getFillColor()}`;
+                        buttonItem.style.color = 'black';
+                        buttonItem.textContent = `${layer.getName()}`;
+                        buttonItem.setAttribute('data-default-name', `${layer.getName()}`);
+                        buttonItem.addEventListener('click', function () {
+                            let defaultName = buttonItem.getAttribute('data-default-name');
+                            // Get the current visibility
+                            let currentVisibility = layer.getLayerVisibility(); 
+                            // Toggle the visibility of the layer
+                            layer.setLayerVisibility(!currentVisibility);
+                            buttonItem.textContent = !currentVisibility ? defaultName : `${defaultName} (hidden)`;
+                        });
+                        columnItem.appendChild(buttonItem);
+                        layerContainerDOM.appendChild(columnItem);
                     }
                 }
                 console.log("Canvas ID: " + this._canvas.id + "\nLayers: " + JSON.stringify(this._layers, null, 2));
             }
             else {
-                console.log("Canvas ID: " + this._canvas.id + "\nLayers: No Layers");
+                console.error("Canvas ID: " + this._canvas.id + "\nLayers: No Layers");
             }
         }
     }
 
     /**
-     * @description Insert a new layer on the base canvas and
+     * Insert a new layer on the base canvas and
      * automatically calls the displayLayers() to update the container
      * @param {Layer} layer The item that will be added to the LayerContainer
      */
     addLayer(layer)
     {
-        this._layers.push(layer);
+        this.getLayers().push(layer);
+        for (let layer of this.getLayers()) {
+            if (layer.getLayerMovability() === true) {
+                this.applyMouseEventsOnLayer(layer.getName());
+            }
+        }
+        this.displayLayers(true);
     }
 
     /**
-     * @description Selects a layer from the LayerContainer
+     * Selects a layer from the LayerContainer
      * @param {string} name 
      */
     selectLayer(name) {
-        const selectedLayer = this._layers.find(layer => layer._name === name);
+        const selectedLayer = this.getLayers().find(layer => layer._name === name);
         if (selectedLayer != null) {
             return selectedLayer;
         }
         else {
-            alert(`Layer with name "${name}" not found in the collection.`);
+            console.error(`Layer with name "${name}" not found in the collection.`);
             return null;
         }
     }
 
     /**
-     * @description Swap the indexes of the multiple selected layers
+     * Swap the indexes of the multiple selected layers
      * @param {Layer[]} layers Array of layers to be swapped using their indexes
      */
     swapLayerIndex(...layers) {
         for (let i = 1; i < layers.length; i++) {
             const currentLayer = layers[i];
             const previousLayer = layers[i - 1];
-    
             if (currentLayer instanceof CanvasLayer && previousLayer instanceof CanvasLayer) {
                 const tempIndex = currentLayer.getIndex();
                 currentLayer.setIndex(previousLayer.getIndex());
                 previousLayer.setIndex(tempIndex);
             }
+        }
+    }
+
+    applyMouseEventsOnLayer(name) {
+        const selectedLayer = this.selectLayer(name);
+        if (selectedLayer != null) {
+            let isDragging = false;
+            let offsetX, offsetY;
+            this.getCanvas().addEventListener('mousedown', (e) => {
+                console.info("Mouse Down Triggered")
+                const mouseX = e.clientX - this.getCanvas().getBoundingClientRect().left;
+                const mouseY = e.clientY - this.getCanvas().getBoundingClientRect().top;
+                if (mouseX >= selectedLayer.getPosX() &&
+                    mouseX <= selectedLayer.getPosX() + selectedLayer.getWidth() &&
+                    mouseY >= selectedLayer.getPosY() &&
+                    mouseY <= selectedLayer.getPosY() + selectedLayer.getHeight()) {
+                    const topLayer = this.getLayers().reduce((prevLayer, currentLayer) => {
+                        if (mouseX >= currentLayer.getPosX() &&
+                            mouseX <= currentLayer.getPosX() + currentLayer.getWidth() &&
+                            mouseY >= currentLayer.getPosY() &&
+                            mouseY <= currentLayer.getPosY() + currentLayer.getHeight()) {
+                            return prevLayer.getIndex() > currentLayer.getIndex() ? prevLayer : currentLayer;
+                        }
+                        return prevLayer;
+                    }, selectedLayer);
+                    if (topLayer === selectedLayer) {
+                        isDragging = true;
+                        offsetX = mouseX - selectedLayer.getPosX();
+                        offsetY = mouseY - selectedLayer.getPosY();
+                    }
+                }
+            });
+            this.getCanvas().addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    console.info("Mouse is Dragging")
+                    const mouseX = e.clientX - this.getCanvas().getBoundingClientRect().left;
+                    const mouseY = e.clientY - this.getCanvas().getBoundingClientRect().top;
+    
+                    // Calculate the new position
+                    const newX = mouseX - offsetX;
+                    const newY = mouseY - offsetY;
+    
+                    // Update the position while preserving the z-index
+                    selectedLayer.setPosX(newX);
+                    selectedLayer.setPosY(newY);
+    
+                    // Redraw the canvas with the updated position and z-index
+                    this.displayLayers(true); // Pass true to indicate that the layers are sorted by z-index
+                }
+            });
+            this.getCanvas().addEventListener('mouseup', (e) => {    
+                console.info("Mouse Up Triggered")
+                isDragging = false;
+            });
         }
     }
 }
