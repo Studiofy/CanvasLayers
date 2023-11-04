@@ -103,6 +103,7 @@ export default class ParentContainer
                 for (const layer of sortedLayers) {
                     if (layer.getLayerVisibility() === true) {
                         layer.drawLayer(this.get2DContext());
+
                         let columnItem = document.createElement("div");
                         columnItem.classList.add("row", "mt-2", "mb-3");
                         columnItem.style.maxHeight = '30px';
@@ -112,13 +113,35 @@ export default class ParentContainer
                         buttonItem.style.color = 'black';
                         buttonItem.textContent = `${layer.getName()}`;
                         buttonItem.setAttribute('data-default-name', `${layer.getName()}`);
-                        buttonItem.addEventListener('click', function () {
+                        buttonItem.addEventListener('click', () => {
                             let defaultName = buttonItem.getAttribute('data-default-name');
                             // Get the current visibility
                             let currentVisibility = layer.getLayerVisibility(); 
                             // Toggle the visibility of the layer
                             layer.setLayerVisibility(!currentVisibility);
                             buttonItem.textContent = !currentVisibility ? defaultName : `${defaultName} (hidden)`;
+                            this.displayLayers(IsDisplaySorted);
+                        });
+                        columnItem.appendChild(buttonItem);
+                        layerContainerDOM.appendChild(columnItem);
+                    } else {
+                        let columnItem = document.createElement("div");
+                        columnItem.classList.add("row", "mt-2", "mb-3");
+                        columnItem.style.maxHeight = '30px';
+                        let buttonItem = document.createElement("button");
+                        buttonItem.classList.add("btn", "btn-outline-primary", "mx-3", "my-1");
+                        buttonItem.style.backgroundColor = `${layer.getFillColor()}`;
+                        buttonItem.style.color = 'black';
+                        buttonItem.textContent = `${layer.getName()}`;
+                        buttonItem.setAttribute('data-default-name', `${layer.getName()}`);
+                        buttonItem.addEventListener('click', () => {
+                            let defaultName = buttonItem.getAttribute('data-default-name');
+                            // Get the current visibility
+                            let currentVisibility = layer.getLayerVisibility(); 
+                            // Toggle the visibility of the layer
+                            layer.setLayerVisibility(!currentVisibility);
+                            buttonItem.textContent = !currentVisibility ? defaultName : `${defaultName} (hidden)`;
+                            this.displayLayers(IsDisplaySorted);
                         });
                         columnItem.appendChild(buttonItem);
                         layerContainerDOM.appendChild(columnItem);
@@ -137,6 +160,7 @@ export default class ParentContainer
                 for (const layer of this.getLayers()) {
                     if (layer.getLayerVisibility() === true) {
                         layer.drawLayer(this.get2DContext());
+                        
                         let columnItem = document.createElement("div");
                         columnItem.classList.add("row", "mt-2", "mb-3");
                         columnItem.style.maxHeight = '30px';
@@ -146,17 +170,40 @@ export default class ParentContainer
                         buttonItem.style.color = 'black';
                         buttonItem.textContent = `${layer.getName()}`;
                         buttonItem.setAttribute('data-default-name', `${layer.getName()}`);
-                        buttonItem.addEventListener('click', function () {
+                        buttonItem.addEventListener('click', () => {
                             let defaultName = buttonItem.getAttribute('data-default-name');
                             // Get the current visibility
                             let currentVisibility = layer.getLayerVisibility(); 
                             // Toggle the visibility of the layer
                             layer.setLayerVisibility(!currentVisibility);
                             buttonItem.textContent = !currentVisibility ? defaultName : `${defaultName} (hidden)`;
+                            this.displayLayers(IsDisplaySorted);
+                        });
+                        columnItem.appendChild(buttonItem);
+                        layerContainerDOM.appendChild(columnItem);
+                    } else {
+                        let columnItem = document.createElement("div");
+                        columnItem.classList.add("row", "mt-2", "mb-3");
+                        columnItem.style.maxHeight = '30px';
+                        let buttonItem = document.createElement("button");
+                        buttonItem.classList.add("btn", "btn-outline-primary", "mx-3", "my-1");
+                        buttonItem.style.backgroundColor = `${layer.getFillColor()}`;
+                        buttonItem.style.color = 'black';
+                        buttonItem.textContent = `${layer.getName()}`;
+                        buttonItem.setAttribute('data-default-name', `${layer.getName()}`);
+                        buttonItem.addEventListener('click', () => {
+                            let defaultName = buttonItem.getAttribute('data-default-name');
+                            // Get the current visibility
+                            let currentVisibility = layer.getLayerVisibility(); 
+                            // Toggle the visibility of the layer
+                            layer.setLayerVisibility(!currentVisibility);
+                            buttonItem.textContent = !currentVisibility ? defaultName : `${defaultName} (hidden)`;
+                            this.displayLayers(IsDisplaySorted);
                         });
                         columnItem.appendChild(buttonItem);
                         layerContainerDOM.appendChild(columnItem);
                     }
+                    
                 }
                 console.log("Canvas ID: " + this._canvas.id + "\nLayers: " + JSON.stringify(this._layers, null, 2));
             }
@@ -177,6 +224,8 @@ export default class ParentContainer
         for (let layer of this.getLayers()) {
             if (layer.getLayerMovability() === true) {
                 this.applyMouseEventsOnLayer(layer.getName());
+            } else {
+                this.removeMouseEventsOnLayer(layer.getName());
             }
         }
         this.displayLayers(true);
@@ -261,6 +310,60 @@ export default class ParentContainer
                 }
             });
             this.getCanvas().addEventListener('mouseup', (e) => {    
+                console.info("Mouse Up Triggered")
+                isDragging = false;
+            });
+        }
+    }
+
+    removeMouseEventsOnLayer(name) {
+        const selectedLayer = this.selectLayer(name);
+        if (selectedLayer != null) {
+            let isDragging = false;
+            let offsetX, offsetY;
+            this.getCanvas().removeEventListener('mousedown', (e) => {
+                console.info("Mouse Down Triggered")
+                const mouseX = e.clientX - this.getCanvas().getBoundingClientRect().left;
+                const mouseY = e.clientY - this.getCanvas().getBoundingClientRect().top;
+                if (mouseX >= selectedLayer.getPosX() &&
+                    mouseX <= selectedLayer.getPosX() + selectedLayer.getWidth() &&
+                    mouseY >= selectedLayer.getPosY() &&
+                    mouseY <= selectedLayer.getPosY() + selectedLayer.getHeight()) {
+                    const topLayer = this.getLayers().reduce((prevLayer, currentLayer) => {
+                        if (mouseX >= currentLayer.getPosX() &&
+                            mouseX <= currentLayer.getPosX() + currentLayer.getWidth() &&
+                            mouseY >= currentLayer.getPosY() &&
+                            mouseY <= currentLayer.getPosY() + currentLayer.getHeight()) {
+                            return prevLayer.getIndex() > currentLayer.getIndex() ? prevLayer : currentLayer;
+                        }
+                        return prevLayer;
+                    }, selectedLayer);
+                    if (topLayer === selectedLayer) {
+                        isDragging = true;
+                        offsetX = mouseX - selectedLayer.getPosX();
+                        offsetY = mouseY - selectedLayer.getPosY();
+                    }
+                }
+            });
+            this.getCanvas().removeEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    console.info("Mouse is Dragging")
+                    const mouseX = e.clientX - this.getCanvas().getBoundingClientRect().left;
+                    const mouseY = e.clientY - this.getCanvas().getBoundingClientRect().top;
+    
+                    // Calculate the new position
+                    const newX = mouseX - offsetX;
+                    const newY = mouseY - offsetY;
+    
+                    // Update the position while preserving the z-index
+                    selectedLayer.setPosX(newX);
+                    selectedLayer.setPosY(newY);
+    
+                    // Redraw the canvas with the updated position and z-index
+                    this.displayLayers(true); // Pass true to indicate that the layers are sorted by z-index
+                }
+            });
+            this.getCanvas().removeEventListener('mouseup', (e) => {    
                 console.info("Mouse Up Triggered")
                 isDragging = false;
             });
